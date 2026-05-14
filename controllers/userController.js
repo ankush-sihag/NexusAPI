@@ -2,7 +2,7 @@ const User = require('../models/User');
 
 const getProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.params.id)
+        const user = await User.findById(req.user._id)
             .select('-password -refreshToken')
             .populate('posts');
 
@@ -13,3 +13,5 @@ const getProfile = async (req, res) => {
         res.status(500).send('Server Error');
     }
 };
+
+module.exports = { getProfile };
