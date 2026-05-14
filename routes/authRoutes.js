@@ -16,5 +16,6 @@ router.post('/register', register);
 router.post('/login', loginUser);
 router.post('/refresh', refreshAccessToken);
 router.get('/profile', protect, getProfile);
+router.post('/logout',protect, logout);
 
 module.exports = router;

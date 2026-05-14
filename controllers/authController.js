@@ -9,11 +9,11 @@ const register = async (req, res) => {
         const { username, email, password } = req.body;
 
         const userExists = await User.findOne({ email });
-        if (userExists) return res.status(400).json({ msg: 'User already exists'})
+        if (userExists) return res.status(400).json({ msg: 'User already exists'});
 
         const user = await User.create({ username, email, password });
 
-        const { accessToken, refreshToken  } = generateTokens(user._id);
+        const { accessToken, refreshToken  } = generateToken(user._id);
 
         user.refreshToken = refreshToken;
         await user.save();
@@ -46,7 +46,7 @@ const loginUser =async (req, res) => {
             refreshToken
         });
     } catch (error) {
-        res.status(500).json({ msg: 'error.message'});
+        res.status(500).json({ msg: error.message});
     }
 };
 
@@ -57,12 +57,12 @@ const refreshAccessToken = async (req, res) => {
     try {
         const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
 
-        const user = await User.findById(decoded.id);
+        const user = await User.findById(decoded._id);
         if (!user || user.refreshToken !== token) {
             return res.status(403).json({ msg: 'invalid refresh token'});
         }
 
-        const tokens = generateTokens(user._id);
+        const tokens = generateToken(user._id);
         res.json({ accessToken: tokens.accessToken});
     } catch (err) {
         return res.status(403).json({ msg: 'Token expired or invalid'});
@@ -78,7 +78,7 @@ const refreshAccessToken = async (req, res) => {
 
 const logout = async (req, res) => {
     try {
-        const user = await User.findById(req.user);
+        const user = await User.findById(req.user._id);
 
         user.refreshToken = null;
         await user.save();
